@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from services.webex_call import call_from_device, call_from_local
+from services.webex_call import call_from_device
 import threading
 from pynput import keyboard
 
