@@ -11,6 +11,12 @@ CAMERA_CONFIG = {
     "darwin": {"index": None, "use_dshow": False},  # macOS는 'darwin'으로 표시됨
 }
 
+# 맥OS에서는 기본적으로 카메라 인덱스를 반전시킴 (0번이 USB, 1번이 내장)
+# 환경변수가 명시적으로 false로 설정되었을 때만 반전 안함
+REVERSE_CAMERA_INDEX_ON_MAC = (
+    os.environ.get("REVERSE_CAMERA_INDEX_ON_MAC", "true").lower() != "false"
+)
+
 # 내장 웹캠 감지를 위한 키워드
 BUILTIN_CAMERA_KEYWORDS = [
     "integrated",
@@ -42,6 +48,10 @@ USB_CAMERA_KEYWORDS = [
     "c270",
     "hd pro",
 ]
+
+# 맥OS에서 카메라 반전 상태 출력
+if platform.system().lower() == "darwin":
+    print(f"맥OS 카메라 인덱스 반전 설정: {REVERSE_CAMERA_INDEX_ON_MAC}")
 
 
 def get_camera_details_windows():
@@ -216,9 +226,14 @@ def detect_webcam():
 
                     # 기본적으로, 이름에 내장/외장 키워드가 없다면 인덱스로 추정
                     if not is_builtin and not is_usb:
-                        # 일반적으로 0번 인덱스는 내장 웹캠인 경우가 많음
-                        is_builtin = i == 0
-                        is_usb = i > 0
+                        if system == "darwin" and REVERSE_CAMERA_INDEX_ON_MAC:
+                            # 맥OS에서 인덱스 반전: 0번이 USB, 1번이 내장
+                            is_builtin = i == 1
+                            is_usb = i == 0
+                        else:
+                            # 일반적으로 0번 인덱스는 내장 웹캠인 경우가 많음
+                            is_builtin = i == 0
+                            is_usb = i > 0
 
                 camera_info = {
                     "index": i,
@@ -284,6 +299,10 @@ def detect_webcam():
 
     # 카메라 우선순위에 따라 정렬 (USB 외장 웹캠 > 기타 > 내장 웹캠, 그리고 각 카테고리 내에서는 해상도 높은 순)
     available_cameras.sort(key=get_camera_priority, reverse=True)
+
+    # 맥OS에서 카메라 인덱스 반전 옵션이 활성화된 경우
+    if system == "darwin" and REVERSE_CAMERA_INDEX_ON_MAC:
+        print("맥OS에서 카메라 인덱스 반전 옵션 활성화됨")
 
     # 정렬된 카메라 정보 출력
     print("\n카메라 우선순위 결과:")
