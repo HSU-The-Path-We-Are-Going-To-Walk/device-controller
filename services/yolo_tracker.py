@@ -9,9 +9,6 @@ model = YOLO("yolov8n.pt")  # 최소 YOLO 모델 사용
 
 # 사람 클래스 ID (YOLO에서 사람은 클래스 0번)
 PERSON_CLASS_ID = 0
-# 로컬 API 서버 URL
-LOCAL_API_URL = "http://localhost:8000"
-
 
 def count_people(frame):
 
@@ -20,7 +17,6 @@ def count_people(frame):
     boxes = results[0].boxes
     count = sum(1 for box in boxes if int(box.cls) == PERSON_CLASS_ID)
     return count
-
 
 def track_people():
 
@@ -38,20 +34,14 @@ def track_people():
             if prev_count == 0 and current_count > 0:
                 print(f"인원 감지 시작: {current_count}명 → POST /sessionStart")
                 try:
-                    # 채팅 서버에 알림
                     requests.post(f"{CHATBOT_SERVER}/sessionStart")
-                    # 로컬 API 서버에도 알림
-                    requests.post(f"{LOCAL_API_URL}/sessionStart")
                 except Exception as e:
                     print("/sessionStart 전송 실패:", e)
 
             elif prev_count > 0 and current_count == 0:
                 print("아무도 없음 → POST /sessionReset")
                 try:
-                    # 채팅 서버에 알림
                     requests.post(f"{CHATBOT_SERVER}/sessionReset")
-                    # 로컬 API 서버에도 알림
-                    requests.post(f"{LOCAL_API_URL}/sessionReset")
                 except Exception as e:
                     print("/sessionReset 전송 실패:", e)
 
