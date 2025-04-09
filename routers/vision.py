@@ -8,9 +8,11 @@ import time
 
 router = APIRouter()
 
+
 @router.on_event("startup")
 def start_tracking():
     track_people()
+
 
 @router.get("/stream/detection")
 async def video_feed():
@@ -18,9 +20,9 @@ async def video_feed():
     YOLO로 사람을 감지하고 바운딩 박스를 그린 비디오 스트림을 제공합니다.
     """
     return StreamingResponse(
-        generate_frames(),
-        media_type="multipart/x-mixed-replace;boundary=frame"
+        generate_frames(), media_type="multipart/x-mixed-replace;boundary=frame"
     )
+
 
 def generate_frames():
     """
@@ -32,20 +34,20 @@ def generate_frames():
             try:
                 # 프로젝트의 프레임 가져오기 함수 사용
                 frame = get_frame(cap)
-                
+
                 # YOLO 감지 및 바운딩 박스 그리기 적용
                 frame_with_detection = get_detection_frame(frame)
-                
+
                 # JPEG 형식으로 인코딩
-                _, encoded_frame = cv2.imencode('.jpg', frame_with_detection)
+                _, encoded_frame = cv2.imencode(".jpg", frame_with_detection)
                 frame_bytes = encoded_frame.tobytes()
-                
+
                 # multipart 응답 형식으로 전송
                 yield (
-                    b'--frame\r\n'
-                    b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n'
+                    b"--frame\r\n"
+                    b"Content-Type: image/jpeg\r\n\r\n" + frame_bytes + b"\r\n"
                 )
-                
+
                 # 프레임 레이트 조절
                 time.sleep(0.05)  # 약 20fps
             except Exception as e:
