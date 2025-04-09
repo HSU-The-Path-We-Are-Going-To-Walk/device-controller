@@ -2,7 +2,7 @@ import cv2
 import requests
 from ultralytics import YOLO
 from utils.camera import initialize_camera, get_frame
-from config import SERVER
+from config import CHATBOT_SERVER
 import time
 
 model = YOLO("yolov8n.pt")  # 최소 YOLO 모델 사용
@@ -34,14 +34,14 @@ def track_people():
             if prev_count == 0 and current_count > 0:
                 print(f"인원 감지 시작: {current_count}명 → POST /sessionStart")
                 try:
-                    requests.post(f"{SERVER}/sessionStart")
+                    requests.post(f"{CHATBOT_SERVER}/sessionStart")
                 except Exception as e:
                     print("/sessionStart 전송 실패:", e)
 
             elif prev_count > 0 and current_count == 0:
                 print("아무도 없음 → POST /sessionReset")
                 try:
-                    requests.post(f"{SERVER}/sessionReset")
+                    requests.post(f"{CHATBOT_SERVER}/sessionReset")
                 except Exception as e:
                     print("/sessionReset 전송 실패:", e)
 
