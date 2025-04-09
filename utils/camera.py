@@ -419,8 +419,8 @@ def initialize_camera(index=None):
         )
 
     # 카메라 설정
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+    # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+    # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
 
     print(f"카메라(index={CAMERA_CONFIG[system]['index']}) 초기화 완료")
     return cap
