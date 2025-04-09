@@ -4,12 +4,71 @@ import platform
 import os
 import subprocess
 import re
+import json
 
 # 설정 값을 저장할 딕셔너리
 CAMERA_CONFIG = {
     "windows": {"index": None, "use_dshow": True},
     "darwin": {"index": None, "use_dshow": False},  # macOS는 'darwin'으로 표시됨
 }
+
+# 설정 파일 경로
+CAMERA_CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "camera_config.json")
+
+# 설정 파일에서 카메라 설정 로드
+def load_camera_config():
+    if os.path.exists(CAMERA_CONFIG_FILE):
+        try:
+            with open(CAMERA_CONFIG_FILE, 'r') as f:
+                config = json.load(f)
+                # 올바른 키가 있는지 확인
+                for system in ["windows", "darwin"]:
+                    if system in config and "index" in config[system]:
+                        CAMERA_CONFIG[system]["index"] = config[system]["index"]
+                        print(f"{system.capitalize()} 카메라 인덱스 설정 로드됨: {CAMERA_CONFIG[system]['index']}")
+        except Exception as e:
+            print(f"카메라 설정 로드 중 오류 발생: {e}")
+
+# 설정을 파일에 저장
+def save_camera_config():
+    try:
+        with open(CAMERA_CONFIG_FILE, 'w') as f:
+            json.dump(CAMERA_CONFIG, f)
+            print(f"카메라 설정이 저장되었습니다: {CAMERA_CONFIG_FILE}")
+    except Exception as e:
+        print(f"카메라 설정 저장 중 오류 발생: {e}")
+
+# 카메라 인덱스를 설정하고 저장하는 함수
+def set_camera_index(index, system=None):
+    """
+    특정 운영체제의 카메라 인덱스를 설정하고 저장합니다.
+    
+    Args:
+        index: 설정할 카메라 인덱스
+        system: 설정할 운영체제 (None인 경우 현재 운영체제)
+    
+    Returns:
+        설정된 카메라 인덱스
+    """
+    if system is None:
+        system = platform.system().lower()
+    
+    if system not in ["windows", "darwin"]:
+        print(f"지원되지 않는 운영체제: {system}")
+        return None
+    
+    try:
+        index = int(index)
+        CAMERA_CONFIG[system]["index"] = index
+        print(f"{system.capitalize()} 카메라 인덱스가 {index}로 설정되었습니다.")
+        save_camera_config()
+        return index
+    except ValueError:
+        print(f"유효하지 않은 카메라 인덱스: {index}")
+        return None
+
+# 초기 설정 로드
+load_camera_config()
 
 # 맥OS에서는 기본적으로 카메라 인덱스를 반전시킴 (0번이 USB, 1번이 내장)
 # 환경변수가 명시적으로 false로 설정되었을 때만 반전 안함
@@ -346,6 +405,8 @@ def initialize_camera(index=None):
         if env_index is not None:
             CAMERA_CONFIG[system]["index"] = int(env_index)
             print(f"환경변수에서 카메라 인덱스 설정: {env_index}")
+            # 설정을 파일에 저장
+            save_camera_config()
         else:
             # 자동으로 사용 가능한 웹캠 감지
             detected_cameras = detect_webcam()
@@ -354,6 +415,8 @@ def initialize_camera(index=None):
                 print(
                     f"자동으로 카메라 인덱스 설정: {detected_cameras[0]} (외장 웹캠 우선)"
                 )
+                # 설정을 파일에 저장
+                save_camera_config()
             else:
                 # 기본값으로 설정
                 CAMERA_CONFIG[system]["index"] = 0

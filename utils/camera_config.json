@@ -1,0 +1,10 @@
+{
+    "windows": {
+        "index": 1,
+        "use_dshow": true
+    },
+    "darwin": {
+        "index": 0,
+        "use_dshow": false
+    }
+}
