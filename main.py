@@ -1,12 +1,26 @@
 from fastapi import FastAPI
-from routers import button, vision
+from fastapi.middleware.cors import CORSMiddleware
+from routers import button, vision, audio
 import uvicorn
 import signal
 import sys
 
 app = FastAPI()
+
+# CORS 미들웨어 추가
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "*"
+    ],  # 테스트 환경에서는 모든 오리진 허용 (프로덕션에서는 특정 오리진만 허용하는 것이 좋음)
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.include_router(button.router)
 app.include_router(vision.router)
+app.include_router(audio.router)
 
 
 # Ctrl+C 시그널 핸들러
