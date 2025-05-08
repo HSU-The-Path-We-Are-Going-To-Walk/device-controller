@@ -19,8 +19,8 @@ app.add_middleware(
 )
 
 app.include_router(button.router)
-app.include_router(vision.router)
-app.include_router(audio.router)
+# app.include_router(vision.router)
+# app.include_router(audio.router)
 
 
 # Ctrl+C 시그널 핸들러
